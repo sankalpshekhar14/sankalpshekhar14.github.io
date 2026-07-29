@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:
+Sitemap: https://sankalpshekhar.com/sitemap.xml

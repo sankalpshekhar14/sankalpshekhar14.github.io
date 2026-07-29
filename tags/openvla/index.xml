@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Sankalp&#39;s Blog</title>
-    <link>https://sankalpshekhar.com/</link>
-    <description>Recent content on Sankalp&#39;s Blog</description>
+    <title>Openvla on Sankalp&#39;s Blog</title>
+    <link>https://sankalpshekhar.com/tags/openvla/</link>
+    <description>Recent content in Openvla on Sankalp&#39;s Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 29 Jul 2026 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://sankalpshekhar.com/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://sankalpshekhar.com/tags/openvla/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>VLA Models: Why Hardware Is Harder Than Text</title>
       <link>https://sankalpshekhar.com/posts/vla-models-hardware-is-hard/</link>
