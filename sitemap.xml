@@ -2,10 +2,45 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://example.org/categories/</loc>
+    <loc>https://sankalpshekhar.com/tags/ai/</loc>
+    <lastmod>2026-07-29T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://example.org/</loc>
+    <loc>https://sankalpshekhar.com/tags/machine-learning/</loc>
+    <lastmod>2026-07-29T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://example.org/tags/</loc>
+    <loc>https://sankalpshekhar.com/tags/openvla/</loc>
+    <lastmod>2026-07-29T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://sankalpshekhar.com/tags/pi-zero/</loc>
+    <lastmod>2026-07-29T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://sankalpshekhar.com/posts/</loc>
+    <lastmod>2026-07-29T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://sankalpshekhar.com/tags/robotics/</loc>
+    <lastmod>2026-07-29T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://sankalpshekhar.com/</loc>
+    <lastmod>2026-07-29T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://sankalpshekhar.com/tags/</loc>
+    <lastmod>2026-07-29T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://sankalpshekhar.com/tags/vision-language-action/</loc>
+    <lastmod>2026-07-29T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://sankalpshekhar.com/tags/vla/</loc>
+    <lastmod>2026-07-29T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://sankalpshekhar.com/posts/vla-models-hardware-is-hard/</loc>
+    <lastmod>2026-07-29T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://sankalpshekhar.com/archives/</loc>
+  </url><url>
+    <loc>https://sankalpshekhar.com/categories/</loc>
+  </url><url>
+    <loc>https://sankalpshekhar.com/search/</loc>
+  </url><url>
+    <loc>https://sankalpshekhar.com/series/</loc>
   </url>
 </urlset>

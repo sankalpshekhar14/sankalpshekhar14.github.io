@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>VLA Models: Why Hardware Is Harder Than Text | Sankalp&#39;s Blog</title>
+<meta name="keywords" content="vla, robotics, ai, machine-learning, vision-language-action, pi-zero, openvla">
+<meta name="description" content="I spent a few weeks reading VLA papers thinking they&#39;d be LLMs with a robot head. Turns out, 200 ms of latency isn&#39;t a UI glitch when there&#39;s a physical arm involved.">
+<meta name="author" content="Sankalp Shekhar">
+<link rel="canonical" href="https://sankalpshekhar.com/posts/vla-models-hardware-is-hard/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.cd9298b33628769aa1bc1acebbbfd7aa11ce81dfe03484d479e1907760249a1d.css" integrity="sha256-zZKYszYodpqhvBrOu7/XqhHOgd/gNITUeeGQd2Akmh0=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://sankalpshekhar.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://sankalpshekhar.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://sankalpshekhar.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://sankalpshekhar.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://sankalpshekhar.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://sankalpshekhar.com/posts/vla-models-hardware-is-hard/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+<meta property="og:url" content="https://sankalpshekhar.com/posts/vla-models-hardware-is-hard/">
+  <meta property="og:site_name" content="Sankalp&#39;s Blog">
+  <meta property="og:title" content="VLA Models: Why Hardware Is Harder Than Text">
+  <meta property="og:description" content="I spent a few weeks reading VLA papers thinking they&#39;d be LLMs with a robot head. Turns out, 200 ms of latency isn&#39;t a UI glitch when there&#39;s a physical arm involved.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-07-29T00:00:00+00:00">
+    <meta property="article:modified_time" content="2026-07-29T00:00:00+00:00">
+    <meta property="article:tag" content="Vla">
+    <meta property="article:tag" content="Robotics">
+    <meta property="article:tag" content="Ai">
+    <meta property="article:tag" content="Machine-Learning">
+    <meta property="article:tag" content="Vision-Language-Action">
+    <meta property="article:tag" content="Pi-Zero">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="VLA Models: Why Hardware Is Harder Than Text">
+  <meta name="twitter:description" content="I spent a few weeks reading VLA papers thinking they&#39;d be LLMs with a robot head. Turns out, 200 ms of latency isn&#39;t a UI glitch when there&#39;s a physical arm involved.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://sankalpshekhar.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "VLA Models: Why Hardware Is Harder Than Text",
+      "item": "https://sankalpshekhar.com/posts/vla-models-hardware-is-hard/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "VLA Models: Why Hardware Is Harder Than Text",
+  "name": "VLA Models: Why Hardware Is Harder Than Text",
+  "description": "I spent a few weeks reading VLA papers thinking they'd be LLMs with a robot head. Turns out, 200 ms of latency isn't a UI glitch when there's a physical arm involved.",
+  "keywords": [
+    "vla", "robotics", "ai", "machine-learning", "vision-language-action", "pi-zero", "openvla"
+  ],
+  "articleBody": "I spend most of my days working with LLMs and building backend systems. So when I first heard about Vision-Language-Action (VLA) models like OpenVLA, π₀, and Octo, my brain immediately slotted them into a familiar box: “multimodal LLM, different output head, done.”\nTurns out that’s roughly as accurate as saying a Formula 1 car is just a sedan with a bigger engine.\nThe thing that broke my mental model was latency. When you’re streaming tokens from a chatbot, an extra 200 ms is barely noticeable. Maybe the cursor blinks a beat longer. When you’re controlling a robot arm that needs to react at 30 Hz, 200 ms means it’s already overshot, crashed into the table, or yeeted whatever it was holding across the room. You can’t retry a physical collision. There’s no Ctrl+Z in meatspace.\nI spent a few weeks going deep on the papers, and I want to share what clicked for me: how we got here, how these systems actually work, and why turning language into physical torque is a fundamentally harder problem than I’d appreciated.\nHow Robotics Got Here Before diving into VLAs, it’s worth understanding the path that led to them. Each era solved something and left a gap the next one tried to fill.\nflowchart TD A[\"Classical Control \u0026 Motion Planning\\n(1980s-2010s)\\nInverse Kinematics, PRM, RRT\"] --\u003e B[\"Deep Reinforcement Learning\\n(2015-2020)\\nEnd-to-End, Sim-to-Real, Narrow Tasks\"] B --\u003e C[\"Vision-Language Models\\n(2021-2023)\\nSemantic Scene Understanding\"] C --\u003e D[\"Vision-Language-Action Models\\n(2023-Present)\\nToken-to-Torque Policies\"] The Classical Era For decades, robotics was all hand-engineered pipelines: perception module talks to state estimator, state estimator feeds a path planner (RRT, PRM), planner hands off to a PID controller. Each piece did its job, and the whole thing worked. Right up until something changed. Move a mug two centimetres to the left, change the lighting, introduce an object the system hadn’t been told about, and the whole pipeline would faceplant. It was like a house of cards built on the assumption that the world stays perfectly still.\nDeep RL and Imitation Learning Around 2015, things like QT-Opt and DeepMimic showed that you could skip the handcrafted pipeline entirely and just learn from pixels to motor torque, end-to-end. First time I read those papers, it felt like sorcery.\nBut it didn’t generalise. At all. Train a policy to pick up a red apple and it’d stare blankly at a green one. Every new object, every new environment, meant thousands more hours of training. And getting anything learned in simulation to work on real hardware required absurd amounts of domain randomisation. The gap between sim and real was brutal.\nThe VLA Shift VLAs come at the problem differently. Instead of learning everything from scratch, they piggyback on the massive multimodal pre-training that models like PaLM-E and LLaVA have already done. The foundation model already understands spatial relationships, knows what a “mug” is, can parse instructions. You fine-tune that on real robot trajectory data (datasets like Open X-Embodiment) and suddenly you’ve got something resembling generalised physical intuition. It’s not perfect, but the leap in flexibility is hard to overstate.\nThe Part That Blew My Mind: Fast vs. Slow Thinking This is the section that really rewired my understanding.\nI’m a big fan of Kahneman’s Thinking, Fast and Slow. The core idea: humans have two cognitive systems. System 1 is fast and instinctive. You duck when someone throws a ball at your face. System 2 is slow and deliberate. You sit and calculate 17 × 24.\nWhen I first thought about VLAs, my approach was pure System 2: tokenise joint angles, pack them into the LLM context with camera frames, run autoregressive inference. What could go wrong?\nEverything, it turns out. If your whole pipeline runs through a 7B model doing full attention at every step, you’re stuck at maybe 2 Hz. The robot moves like it’s wading through treacle. It can’t react to anything unexpected because by the time it’s “thought” about a disturbance, the moment is long gone.\nThe clever trick in modern VLAs is that they split things exactly like Kahneman would:\ngraph TB subgraph System2 [\"System 2: The Slow Planner (~1-2 Hz)\"] A[\"Camera Feed\"] --\u003e B[\"VLM Backbone\\n2B-7B Params\"] C[\"Instruction: 'Pass the mug'\"] --\u003e B B --\u003e D[\"Goal Latent Embeddings\"] end subgraph System1 [\"System 1: The Fast Policy (~30-50 Hz)\"] D --\u003e E[\"Action Expert Head\\n30M-300M Params\"] F[\"Proprioception / Telemetry\"] --\u003e E E --\u003e G[\"Action Trajectory Chunks\"] end G --\u003e H[\"Robot Actuators\"] The slow planner (System 2) is a big VLM, 2B to 7B parameters, running in a background thread at 1-2 Hz. It’s doing the heavy lifting: understanding the scene, parsing the instruction, figuring out what to do. “The red mug is behind the plate, so I should reach around.”\nThe fast policy (System 1) is a lightweight action head, 30M to 300M parameters, screaming along at 30-50 Hz. It takes the goal embedding from the planner, combines it with real-time sensor data from the robot’s joints, and outputs continuous motor commands. This is the reflex layer. It doesn’t need to understand the scene; it just needs to smoothly execute the plan while reacting to micro-perturbations.\nThis architecture is the single biggest “aha” for me. You don’t want your biggest, smartest model controlling every motor twitch. You want it thinking about what to do, and a smaller specialist worrying about how to move.\nPapers I’d Actually Recommend Reading There are a ton of papers in this space, but these are the ones that built my understanding:\nRT-1 \u0026 RT-2 (Google DeepMind, 2022-2023): RT-1 proved transformers could do real-world robot control at scale. RT-2 was the breakthrough: take a pre-trained VLM, fine-tune it on robot trajectories, and watch it follow instructions like “pick up the extinct animal” by correctly grabbing the toy dinosaur. That was the moment this stopped feeling like a research curiosity to me.\nACT (Zhao et al., Stanford, 2023): Introduced action chunking and temporal ensembling. Sounds dry, but it’s arguably the most important practical contribution. Predicting one action at a time causes compounding drift. Predicting a chunk of future actions and blending overlapping predictions is what makes these policies actually usable.\nOcto \u0026 OpenVLA (2024): Octo is a diffusion-based policy trained on 800k+ trajectories across 25 robot types. OpenVLA slaps a 7B Llama 2 backbone on the problem and runs on consumer GPUs with 4-bit quantisation. These are the models that made me feel like I could actually try this stuff without a robotics lab budget.\nπ₀ (Physical Intelligence, late 2024): This one is architecturally the most exciting. It ditches discrete action tokens entirely in favour of flow matching, learning continuous vector fields via ODEs. The result is a system that can do dexterous, multi-arm manipulation with fast tactile feedback. Reading this paper felt like seeing the future.\nTokens vs. Noise vs. Flows: The Action Output Problem This bugged me for a while. LLMs output discrete tokens. Robot joints need continuous signals: angles, velocities, torques. How do you get from one to the other?\nThere are three schools of thought right now:\nApproach The Idea Trade-off Discretised Binning Chop continuous joint angles into 256 bins per axis, treat them as vocabulary tokens. (RT-1, RT-2, OpenVLA) Dead simple to train. But quantisation error kills fine motor precision, and sequence length explodes with more joints. Diffusion Heads Start with noise, iteratively denoise conditioned on visual latents until you get a trajectory. (Diffusion Policy, Octo, ACT) Beautifully handles multimodal actions (there’s often more than one good path). But the denoising steps add latency. Flow Matching Learn a continuous vector field that maps noise to trajectories in one smooth pass using ODEs. (π₀, SmolVLA) Fewer steps than diffusion, continuous outputs. But you need to be careful with the vector field design. No silver bullet. Each buys you something and costs you something else.\nWhy Action Chunking Matters More Than I Expected I initially assumed these models worked step-by-step: see state, predict next action, execute, repeat.\nThat’s a trap. Even tiny errors compound. A 0.5° mistake on step 1 becomes a 15° drift by step 30, and now your robot is reaching for thin air.\nThe fix is action chunking: instead of predicting one step, the model predicts a whole trajectory, 30 to 50 future actions, in a single forward pass. As the robot executes, overlapping prediction windows get blended together with exponential decay weighting (temporal ensembling).\nThe blending smooths out jitter and prevents the robot from vibrating itself to death as fresh predictions roll in. It’s one of those ideas that seems obvious in hindsight, but it took a solid paper (ACT) to nail down the details.\nPutting It Together in Code To make the dual-system architecture concrete in my head, I sketched out a toy PyTorch model. It’s simplified to the point of being wrong in many ways, but it captures the core split:\nimport torch import torch.nn as nn class DecoupledVLA(nn.Module): def __init__(self, slow_planner_vlm, fast_action_expert): super().__init__() # System 2: heavy VLM, runs async at ~1-2 Hz self.planner = slow_planner_vlm # System 1: lightweight policy, runs real-time at ~30-50 Hz self.action_expert = fast_action_expert def get_goal_representation(self, image: torch.Tensor, prompt: str) -\u003e torch.Tensor: \"\"\"Background thread. Slow. Understands the world.\"\"\" with torch.no_grad(): goal_latent = self.planner.extract_features(image, prompt) return goal_latent def step_actuation(self, proprio_state: torch.Tensor, goal_latent: torch.Tensor) -\u003e torch.Tensor: \"\"\"Main control loop. Fast. Moves the joints.\"\"\" action_chunk = self.action_expert(proprio_state, goal_latent) return action_chunk # [Batch, Horizon, DoF] The planner runs in a background thread, updating the goal every second or so. The action_expert runs on every control tick, consuming the latest goal embedding plus fresh proprioceptive data. Two loops, two speeds, one robot.\nWhat I’m Still Thinking About I’ve got more questions than answers at this point, but two keep nagging at me:\nWill universal policies ever just work? Cross-embodiment models trained on dozens of robot types are impressive, but every real motor has its own backlash, friction, and sensor noise. I’m not yet convinced you can ship a single checkpoint that works out-of-the-box on arbitrary hardware without at least some calibration fine-tuning.\nHow fast can the reflex layer bail out? If someone bumps into the robot mid-trajectory, System 1 needs to interrupt immediately. But the current action chunk was planned assuming a clear path. How quickly can the fast policy override its own predictions? And what happens to System 2’s world model when the scene changes out from under it?\nI’m planning to dig deeper into both of these, probably starting with some hands-on experiments once I get access to a decent sim environment. If you’re working in this space, I’d genuinely love to hear what you’re seeing. Hit me up on any of my socials.\n",
+  "wordCount" : "1757",
+  "inLanguage": "en",
+  "datePublished": "2026-07-29T00:00:00Z",
+  "dateModified": "2026-07-29T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Sankalp Shekhar"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://sankalpshekhar.com/posts/vla-models-hardware-is-hard/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Sankalp's Blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://sankalpshekhar.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="https://sankalpshekhar.com/" accesskey="h" title="Sankalp&#39;s Blog (Alt + H)">Sankalp&#39;s Blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="https://sankalpshekhar.com/posts" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://sankalpshekhar.com/archives" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://sankalpshekhar.com/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://sankalpshekhar.com/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/posts/">Posts</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      VLA Models: Why Hardware Is Harder Than Text
+    </h1>
+    <div class="post-description">
+      I spent a few weeks reading VLA papers thinking they&#39;d be LLMs with a robot head. Turns out, 200 ms of latency isn&#39;t a UI glitch when there&#39;s a physical arm involved.
+    </div>
+    <div class="post-meta">
+
+<span title='2026-07-29 00:00:00 +0000 UTC'>July 29, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>Sankalp Shekhar</span>
+
+</div>
+  </header> <details class="toc" >
+    <summary accesskey="c" title="(Alt + C)">
+        <span class="title">Table of Contents</span>
+    </summary>
+
+    <div class="inner"><ul>
+            <li>
+                <a href="#how-robotics-got-here" aria-label="How Robotics Got Here">How Robotics Got Here</a><ul>
+                    
+            <li>
+                <a href="#the-classical-era" aria-label="The Classical Era">The Classical Era</a></li>
+            <li>
+                <a href="#deep-rl-and-imitation-learning" aria-label="Deep RL and Imitation Learning">Deep RL and Imitation Learning</a></li>
+            <li>
+                <a href="#the-vla-shift" aria-label="The VLA Shift">The VLA Shift</a></li></ul>
+            </li>
+            <li>
+                <a href="#the-part-that-blew-my-mind-fast-vs-slow-thinking" aria-label="The Part That Blew My Mind: Fast vs. Slow Thinking">The Part That Blew My Mind: Fast vs. Slow Thinking</a></li>
+            <li>
+                <a href="#papers-id-actually-recommend-reading" aria-label="Papers I&rsquo;d Actually Recommend Reading">Papers I&rsquo;d Actually Recommend Reading</a></li>
+            <li>
+                <a href="#tokens-vs-noise-vs-flows-the-action-output-problem" aria-label="Tokens vs. Noise vs. Flows: The Action Output Problem">Tokens vs. Noise vs. Flows: The Action Output Problem</a></li>
+            <li>
+                <a href="#why-action-chunking-matters-more-than-i-expected" aria-label="Why Action Chunking Matters More Than I Expected">Why Action Chunking Matters More Than I Expected</a></li>
+            <li>
+                <a href="#putting-it-together-in-code" aria-label="Putting It Together in Code">Putting It Together in Code</a></li>
+            <li>
+                <a href="#what-im-still-thinking-about" aria-label="What I&rsquo;m Still Thinking About">What I&rsquo;m Still Thinking About</a>
+            </li>
+        </ul>
+    </div>
+</details>
+
+  <div class="post-content md-content"><p>I spend most of my days working with LLMs and building backend systems. So when I first heard about <strong>Vision-Language-Action (VLA)</strong> models like OpenVLA, π₀, and Octo, my brain immediately slotted them into a familiar box: &ldquo;multimodal LLM, different output head, done.&rdquo;</p>
+<p>Turns out that&rsquo;s roughly as accurate as saying a Formula 1 car is just a sedan with a bigger engine.</p>
+<p>The thing that broke my mental model was latency. When you&rsquo;re streaming tokens from a chatbot, an extra 200 ms is barely noticeable. Maybe the cursor blinks a beat longer. When you&rsquo;re controlling a robot arm that needs to react at 30 Hz, 200 ms means it&rsquo;s already overshot, crashed into the table, or yeeted whatever it was holding across the room. You can&rsquo;t retry a physical collision. There&rsquo;s no <code>Ctrl+Z</code> in meatspace.</p>
+<p>I spent a few weeks going deep on the papers, and I want to share what clicked for me: how we got here, how these systems actually work, and why turning language into physical torque is a fundamentally harder problem than I&rsquo;d appreciated.</p>
+<h2 id="how-robotics-got-here">How Robotics Got Here<a hidden class="anchor" aria-hidden="true" href="#how-robotics-got-here">#</a></h2>
+<p>Before diving into VLAs, it&rsquo;s worth understanding the path that led to them. Each era solved something and left a gap the next one tried to fill.</p>
+<div class="mermaid">
+  
+flowchart TD
+    A["Classical Control & Motion Planning\n(1980s-2010s)\nInverse Kinematics, PRM, RRT"] --> B["Deep Reinforcement Learning\n(2015-2020)\nEnd-to-End, Sim-to-Real, Narrow Tasks"]
+    B --> C["Vision-Language Models\n(2021-2023)\nSemantic Scene Understanding"]
+    C --> D["Vision-Language-Action Models\n(2023-Present)\nToken-to-Torque Policies"]
+
+</div>
+
+<h3 id="the-classical-era">The Classical Era<a hidden class="anchor" aria-hidden="true" href="#the-classical-era">#</a></h3>
+<p>For decades, robotics was all hand-engineered pipelines: perception module talks to state estimator, state estimator feeds a path planner (RRT, PRM), planner hands off to a PID controller. Each piece did its job, and the whole thing worked. Right up until something changed. Move a mug two centimetres to the left, change the lighting, introduce an object the system hadn&rsquo;t been told about, and the whole pipeline would faceplant. It was like a house of cards built on the assumption that the world stays perfectly still.</p>
+<h3 id="deep-rl-and-imitation-learning">Deep RL and Imitation Learning<a hidden class="anchor" aria-hidden="true" href="#deep-rl-and-imitation-learning">#</a></h3>
+<p>Around 2015, things like QT-Opt and DeepMimic showed that you could skip the handcrafted pipeline entirely and just learn from pixels to motor torque, end-to-end. First time I read those papers, it felt like sorcery.</p>
+<p>But it didn&rsquo;t generalise. At all. Train a policy to pick up a red apple and it&rsquo;d stare blankly at a green one. Every new object, every new environment, meant thousands more hours of training. And getting anything learned in simulation to work on real hardware required absurd amounts of domain randomisation. The gap between sim and real was brutal.</p>
+<h3 id="the-vla-shift">The VLA Shift<a hidden class="anchor" aria-hidden="true" href="#the-vla-shift">#</a></h3>
+<p>VLAs come at the problem differently. Instead of learning everything from scratch, they piggyback on the massive multimodal pre-training that models like PaLM-E and LLaVA have already done. The foundation model already understands spatial relationships, knows what a &ldquo;mug&rdquo; is, can parse instructions. You fine-tune that on real robot trajectory data (datasets like Open X-Embodiment) and suddenly you&rsquo;ve got something resembling generalised physical intuition. It&rsquo;s not perfect, but the leap in flexibility is hard to overstate.</p>
+<h2 id="the-part-that-blew-my-mind-fast-vs-slow-thinking">The Part That Blew My Mind: Fast vs. Slow Thinking<a hidden class="anchor" aria-hidden="true" href="#the-part-that-blew-my-mind-fast-vs-slow-thinking">#</a></h2>
+<p>This is the section that really rewired my understanding.</p>
+<p>I&rsquo;m a big fan of Kahneman&rsquo;s <em>Thinking, Fast and Slow</em>. The core idea: humans have two cognitive systems. <strong>System 1</strong> is fast and instinctive. You duck when someone throws a ball at your face. <strong>System 2</strong> is slow and deliberate. You sit and calculate 17 × 24.</p>
+<p>When I first thought about VLAs, my approach was pure System 2: tokenise joint angles, pack them into the LLM context with camera frames, run autoregressive inference. What could go wrong?</p>
+<p>Everything, it turns out. If your whole pipeline runs through a 7B model doing full attention at every step, you&rsquo;re stuck at maybe 2 Hz. The robot moves like it&rsquo;s wading through treacle. It can&rsquo;t react to anything unexpected because by the time it&rsquo;s &ldquo;thought&rdquo; about a disturbance, the moment is long gone.</p>
+<p>The clever trick in modern VLAs is that they split things exactly like Kahneman would:</p>
+<div class="mermaid">
+  
+graph TB
+    subgraph System2 ["System 2: The Slow Planner (~1-2 Hz)"]
+        A["Camera Feed"] --> B["VLM Backbone\n2B-7B Params"]
+        C["Instruction: 'Pass the mug'"] --> B
+        B --> D["Goal Latent Embeddings"]
+    end
+
+    subgraph System1 ["System 1: The Fast Policy (~30-50 Hz)"]
+        D --> E["Action Expert Head\n30M-300M Params"]
+        F["Proprioception / Telemetry"] --> E
+        E --> G["Action Trajectory Chunks"]
+    end
+
+    G --> H["Robot Actuators"]
+
+</div>
+
+<p><strong>The slow planner (System 2)</strong> is a big VLM, 2B to 7B parameters, running in a background thread at 1-2 Hz. It&rsquo;s doing the heavy lifting: understanding the scene, parsing the instruction, figuring out <em>what</em> to do. &ldquo;The red mug is behind the plate, so I should reach around.&rdquo;</p>
+<p><strong>The fast policy (System 1)</strong> is a lightweight action head, 30M to 300M parameters, screaming along at 30-50 Hz. It takes the goal embedding from the planner, combines it with real-time sensor data from the robot&rsquo;s joints, and outputs continuous motor commands. This is the reflex layer. It doesn&rsquo;t need to <em>understand</em> the scene; it just needs to smoothly execute the plan while reacting to micro-perturbations.</p>
+<p>This architecture is the single biggest &ldquo;aha&rdquo; for me. You don&rsquo;t want your biggest, smartest model controlling every motor twitch. You want it thinking about <em>what to do</em>, and a smaller specialist worrying about <em>how to move</em>.</p>
+<h2 id="papers-id-actually-recommend-reading">Papers I&rsquo;d Actually Recommend Reading<a hidden class="anchor" aria-hidden="true" href="#papers-id-actually-recommend-reading">#</a></h2>
+<p>There are a ton of papers in this space, but these are the ones that built my understanding:</p>
+<p><strong>RT-1 &amp; RT-2 (Google DeepMind, 2022-2023)</strong>: RT-1 proved transformers could do real-world robot control at scale. RT-2 was the breakthrough: take a pre-trained VLM, fine-tune it on robot trajectories, and watch it follow instructions like &ldquo;pick up the extinct animal&rdquo; by correctly grabbing the toy dinosaur. That was the moment this stopped feeling like a research curiosity to me.</p>
+<p><strong>ACT (Zhao et al., Stanford, 2023)</strong>: Introduced action chunking and temporal ensembling. Sounds dry, but it&rsquo;s arguably the most important practical contribution. Predicting one action at a time causes compounding drift. Predicting a <em>chunk</em> of future actions and blending overlapping predictions is what makes these policies actually usable.</p>
+<p><strong>Octo &amp; OpenVLA (2024)</strong>: Octo is a diffusion-based policy trained on 800k+ trajectories across 25 robot types. OpenVLA slaps a 7B Llama 2 backbone on the problem and runs on consumer GPUs with 4-bit quantisation. These are the models that made me feel like I could actually <em>try</em> this stuff without a robotics lab budget.</p>
+<p><strong>π₀ (Physical Intelligence, late 2024)</strong>: This one is architecturally the most exciting. It ditches discrete action tokens entirely in favour of <strong>flow matching</strong>, learning continuous vector fields via ODEs. The result is a system that can do dexterous, multi-arm manipulation with fast tactile feedback. Reading this paper felt like seeing the future.</p>
+<h2 id="tokens-vs-noise-vs-flows-the-action-output-problem">Tokens vs. Noise vs. Flows: The Action Output Problem<a hidden class="anchor" aria-hidden="true" href="#tokens-vs-noise-vs-flows-the-action-output-problem">#</a></h2>
+<p>This bugged me for a while. LLMs output discrete tokens. Robot joints need continuous signals: angles, velocities, torques. How do you get from one to the other?</p>
+<p>There are three schools of thought right now:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Approach</th>
+					<th>The Idea</th>
+					<th>Trade-off</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><strong>Discretised Binning</strong></td>
+					<td>Chop continuous joint angles into 256 bins per axis, treat them as vocabulary tokens. (RT-1, RT-2, OpenVLA)</td>
+					<td>Dead simple to train. But quantisation error kills fine motor precision, and sequence length explodes with more joints.</td>
+			</tr>
+			<tr>
+					<td><strong>Diffusion Heads</strong></td>
+					<td>Start with noise, iteratively denoise conditioned on visual latents until you get a trajectory. (Diffusion Policy, Octo, ACT)</td>
+					<td>Beautifully handles multimodal actions (there&rsquo;s often more than one good path). But the denoising steps add latency.</td>
+			</tr>
+			<tr>
+					<td><strong>Flow Matching</strong></td>
+					<td>Learn a continuous vector field that maps noise to trajectories in one smooth pass using ODEs. (π₀, SmolVLA)</td>
+					<td>Fewer steps than diffusion, continuous outputs. But you need to be careful with the vector field design.</td>
+			</tr>
+	</tbody>
+</table>
+<p>No silver bullet. Each buys you something and costs you something else.</p>
+<h2 id="why-action-chunking-matters-more-than-i-expected">Why Action Chunking Matters More Than I Expected<a hidden class="anchor" aria-hidden="true" href="#why-action-chunking-matters-more-than-i-expected">#</a></h2>
+<p>I initially assumed these models worked step-by-step: see state, predict next action, execute, repeat.</p>
+<p>That&rsquo;s a trap. Even tiny errors compound. A 0.5° mistake on step 1 becomes a 15° drift by step 30, and now your robot is reaching for thin air.</p>
+<p>The fix is <strong>action chunking</strong>: instead of predicting one step, the model predicts a whole trajectory, 30 to 50 future actions, in a single forward pass. As the robot executes, overlapping prediction windows get blended together with exponential decay weighting (<strong>temporal ensembling</strong>).</p>
+<p>The blending smooths out jitter and prevents the robot from vibrating itself to death as fresh predictions roll in. It&rsquo;s one of those ideas that seems obvious in hindsight, but it took a solid paper (ACT) to nail down the details.</p>
+<h2 id="putting-it-together-in-code">Putting It Together in Code<a hidden class="anchor" aria-hidden="true" href="#putting-it-together-in-code">#</a></h2>
+<p>To make the dual-system architecture concrete in my head, I sketched out a toy PyTorch model. It&rsquo;s simplified to the point of being wrong in many ways, but it captures the core split:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">torch</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">DecoupledVLA</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slow_planner_vlm</span><span class="p">,</span> <span class="n">fast_action_expert</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># System 2: heavy VLM, runs async at ~1-2 Hz</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">planner</span> <span class="o">=</span> <span class="n">slow_planner_vlm</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># System 1: lightweight policy, runs real-time at ~30-50 Hz</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">action_expert</span> <span class="o">=</span> <span class="n">fast_action_expert</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">get_goal_representation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;&#34;&#34;Background thread. Slow. Understands the world.&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">            <span class="n">goal_latent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">planner</span><span class="o">.</span><span class="n">extract_features</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">prompt</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">goal_latent</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">step_actuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proprio_state</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">goal_latent</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;&#34;&#34;Main control loop. Fast. Moves the joints.&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">action_chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_expert</span><span class="p">(</span><span class="n">proprio_state</span><span class="p">,</span> <span class="n">goal_latent</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">action_chunk</span>  <span class="c1"># [Batch, Horizon, DoF]</span>
+</span></span></code></pre></div><p>The <code>planner</code> runs in a background thread, updating the goal every second or so. The <code>action_expert</code> runs on every control tick, consuming the latest goal embedding plus fresh proprioceptive data. Two loops, two speeds, one robot.</p>
+<h2 id="what-im-still-thinking-about">What I&rsquo;m Still Thinking About<a hidden class="anchor" aria-hidden="true" href="#what-im-still-thinking-about">#</a></h2>
+<p>I&rsquo;ve got more questions than answers at this point, but two keep nagging at me:</p>
+<p><strong>Will universal policies ever just work?</strong> Cross-embodiment models trained on dozens of robot types are impressive, but every real motor has its own backlash, friction, and sensor noise. I&rsquo;m not yet convinced you can ship a single checkpoint that works out-of-the-box on arbitrary hardware without at least some calibration fine-tuning.</p>
+<p><strong>How fast can the reflex layer bail out?</strong> If someone bumps into the robot mid-trajectory, System 1 needs to interrupt <em>immediately</em>. But the current action chunk was planned assuming a clear path. How quickly can the fast policy override its own predictions? And what happens to System 2&rsquo;s world model when the scene changes out from under it?</p>
+<p>I&rsquo;m planning to dig deeper into both of these, probably starting with some hands-on experiments once I get access to a decent sim environment. If you&rsquo;re working in this space, I&rsquo;d genuinely love to hear what you&rsquo;re seeing. Hit me up on any of my socials.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://sankalpshekhar.com/tags/vla/">Vla</a></li>
+      <li><a href="https://sankalpshekhar.com/tags/robotics/">Robotics</a></li>
+      <li><a href="https://sankalpshekhar.com/tags/ai/">Ai</a></li>
+      <li><a href="https://sankalpshekhar.com/tags/machine-learning/">Machine-Learning</a></li>
+      <li><a href="https://sankalpshekhar.com/tags/vision-language-action/">Vision-Language-Action</a></li>
+      <li><a href="https://sankalpshekhar.com/tags/pi-zero/">Pi-Zero</a></li>
+      <li><a href="https://sankalpshekhar.com/tags/openvla/">Openvla</a></li>
+    </ul>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share VLA Models: Why Hardware Is Harder Than Text on x"
+            href="https://x.com/intent/tweet/?text=VLA%20Models%3a%20Why%20Hardware%20Is%20Harder%20Than%20Text&amp;url=https%3a%2f%2fsankalpshekhar.com%2fposts%2fvla-models-hardware-is-hard%2f&amp;hashtags=vla%2crobotics%2cai%2cmachine-learning%2cvision-language-action%2cpi-zero%2copenvla">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share VLA Models: Why Hardware Is Harder Than Text on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fsankalpshekhar.com%2fposts%2fvla-models-hardware-is-hard%2f&amp;title=VLA%20Models%3a%20Why%20Hardware%20Is%20Harder%20Than%20Text&amp;summary=VLA%20Models%3a%20Why%20Hardware%20Is%20Harder%20Than%20Text&amp;source=https%3a%2f%2fsankalpshekhar.com%2fposts%2fvla-models-hardware-is-hard%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share VLA Models: Why Hardware Is Harder Than Text on reddit"
+            href="https://reddit.com/submit?url=https%3a%2f%2fsankalpshekhar.com%2fposts%2fvla-models-hardware-is-hard%2f&title=VLA%20Models%3a%20Why%20Hardware%20Is%20Harder%20Than%20Text">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share VLA Models: Why Hardware Is Harder Than Text on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fsankalpshekhar.com%2fposts%2fvla-models-hardware-is-hard%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share VLA Models: Why Hardware Is Harder Than Text on whatsapp"
+            href="https://api.whatsapp.com/send?text=VLA%20Models%3a%20Why%20Hardware%20Is%20Harder%20Than%20Text%20-%20https%3a%2f%2fsankalpshekhar.com%2fposts%2fvla-models-hardware-is-hard%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share VLA Models: Why Hardware Is Harder Than Text on telegram"
+            href="https://telegram.me/share/url?text=VLA%20Models%3a%20Why%20Hardware%20Is%20Harder%20Than%20Text&amp;url=https%3a%2f%2fsankalpshekhar.com%2fposts%2fvla-models-hardware-is-hard%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share VLA Models: Why Hardware Is Harder Than Text on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=VLA%20Models%3a%20Why%20Hardware%20Is%20Harder%20Than%20Text&u=https%3a%2f%2fsankalpshekhar.com%2fposts%2fvla-models-hardware-is-hard%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://sankalpshekhar.com/">Sankalp&#39;s Blog</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    mermaid.initialize({ startOnLoad: true, theme: "default" });
+  });
+</script>
+
+
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

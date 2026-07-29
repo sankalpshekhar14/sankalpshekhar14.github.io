@@ -1,0 +1,4 @@
+# Sankalp's Blog
+
+## Posts
+- [VLA Models: Why Hardware Is Harder Than Text](https://sankalpshekhar.com/posts/vla-models-hardware-is-hard/)

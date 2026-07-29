@@ -1,11 +1,61 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Tags on My New Hugo Project</title>
-    <link>https://example.org/tags/</link>
-    <description>Recent content in Tags on My New Hugo Project</description>
+    <title>Tags on Sankalp&#39;s Blog</title>
+    <link>https://sankalpshekhar.com/tags/</link>
+    <description>Recent content in Tags on Sankalp&#39;s Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <atom:link href="https://example.org/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 29 Jul 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://sankalpshekhar.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Ai</title>
+      <link>https://sankalpshekhar.com/tags/ai/</link>
+      <pubDate>Wed, 29 Jul 2026 00:00:00 +0000</pubDate>
+      <guid>https://sankalpshekhar.com/tags/ai/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Machine-Learning</title>
+      <link>https://sankalpshekhar.com/tags/machine-learning/</link>
+      <pubDate>Wed, 29 Jul 2026 00:00:00 +0000</pubDate>
+      <guid>https://sankalpshekhar.com/tags/machine-learning/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Openvla</title>
+      <link>https://sankalpshekhar.com/tags/openvla/</link>
+      <pubDate>Wed, 29 Jul 2026 00:00:00 +0000</pubDate>
+      <guid>https://sankalpshekhar.com/tags/openvla/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Pi-Zero</title>
+      <link>https://sankalpshekhar.com/tags/pi-zero/</link>
+      <pubDate>Wed, 29 Jul 2026 00:00:00 +0000</pubDate>
+      <guid>https://sankalpshekhar.com/tags/pi-zero/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Robotics</title>
+      <link>https://sankalpshekhar.com/tags/robotics/</link>
+      <pubDate>Wed, 29 Jul 2026 00:00:00 +0000</pubDate>
+      <guid>https://sankalpshekhar.com/tags/robotics/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Vision-Language-Action</title>
+      <link>https://sankalpshekhar.com/tags/vision-language-action/</link>
+      <pubDate>Wed, 29 Jul 2026 00:00:00 +0000</pubDate>
+      <guid>https://sankalpshekhar.com/tags/vision-language-action/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Vla</title>
+      <link>https://sankalpshekhar.com/tags/vla/</link>
+      <pubDate>Wed, 29 Jul 2026 00:00:00 +0000</pubDate>
+      <guid>https://sankalpshekhar.com/tags/vla/</guid>
+      <description></description>
+    </item>
   </channel>
 </rss>
