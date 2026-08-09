@@ -1,4 +1,5 @@
 # Sankalp's Blog
 
 ## Posts
+- [Building Launchpad](https://sankalpshekhar.com/posts/launchpad-ai-prototype-to-production/)
 - [VLA Models: Why Hardware Is Harder Than Text](https://sankalpshekhar.com/posts/vla-models-hardware-is-hard/)

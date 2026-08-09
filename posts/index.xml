@@ -6,8 +6,15 @@
     <description>Recent content in Posts on Sankalp&#39;s Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 29 Jul 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 09 Aug 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://sankalpshekhar.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Building Launchpad</title>
+      <link>https://sankalpshekhar.com/posts/launchpad-ai-prototype-to-production/</link>
+      <pubDate>Sun, 09 Aug 2026 00:00:00 +0000</pubDate>
+      <guid>https://sankalpshekhar.com/posts/launchpad-ai-prototype-to-production/</guid>
+      <description>There&amp;#39;s a gap in how AI development actually works: you build something that works, then spend weeks on infrastructure. Launchpad is trying to fix that.</description>
+    </item>
     <item>
       <title>VLA Models: Why Hardware Is Harder Than Text</title>
       <link>https://sankalpshekhar.com/posts/vla-models-hardware-is-hard/</link>
