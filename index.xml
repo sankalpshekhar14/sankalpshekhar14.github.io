@@ -6,8 +6,15 @@
     <description>Recent content on Sankalp&#39;s Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 09 Aug 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 15 Aug 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://sankalpshekhar.com/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Do LLM Safety Judges Need Full Trajectories to Detect Unsafe Behaviour?</title>
+      <link>https://sankalpshekhar.com/posts/llm-safety-judge-trajectory-visibility/</link>
+      <pubDate>Sat, 15 Aug 2026 00:00:00 +0000</pubDate>
+      <guid>https://sankalpshekhar.com/posts/llm-safety-judge-trajectory-visibility/</guid>
+      <description>A small experiment on whether LLM safety judges perform better when they can see an agent&amp;#39;s full trajectory including tool calls and results, compared to just the final response.</description>
+    </item>
     <item>
       <title>Building Launchpad</title>
       <link>https://sankalpshekhar.com/posts/launchpad-ai-prototype-to-production/</link>
