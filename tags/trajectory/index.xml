@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Trajectory on Sankalp&#39;s Blog</title>
+    <link>http://localhost:1313/tags/trajectory/</link>
+    <description>Recent content in Trajectory on Sankalp&#39;s Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 18 Aug 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/trajectory/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Does giving an LLM safety judge access to an agent&#39;s full trajectory improve its ability to detect unsafe behaviour?</title>
+      <link>http://localhost:1313/posts/llm-safety-judge-trajectory-visibility/</link>
+      <pubDate>Tue, 18 Aug 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/llm-safety-judge-trajectory-visibility/</guid>
+      <description>Research on whether LLM safety judges perform better when they can see an agent&amp;#39;s full trajectory including tool calls and results, compared to just the final response.</description>
+    </item>
+  </channel>
+</rss>
